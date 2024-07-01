@@ -20,7 +20,7 @@ llm = ChatGroq(
 )
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-loader = CSVLoader(file_path="ai4i2020.csv")
+loader = CSVLoader(file_path=os.environ['FILE_NAME'])
 index_creator = VectorstoreIndexCreator(embedding=embedding_model)
 docsearch = index_creator.from_loaders([loader])
 chain = RetrievalQA.from_chain_type(
