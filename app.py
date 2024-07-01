@@ -1,3 +1,4 @@
+# Dependencies Installed
 from langchain_groq import ChatGroq
 from langchain_community.document_loaders.csv_loader import CSVLoader
 from langchain.indexes import VectorstoreIndexCreator
@@ -12,14 +13,16 @@ load_dotenv()
 app = Flask(__name__)
 
 
-# Initialize the LLM and embedding model
+# Initialize the LLM model
 llm = ChatGroq(
     temperature=0.2,
     model="mixtral-8x7b-32768",
     api_key=os.environ['GROQ_API_KEY']
 )
+# Initialize the Embedding model
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
+# Making an in-memory vector DB and chain for retrieval
 loader = CSVLoader(file_path=os.environ['FILE_NAME'])
 index_creator = VectorstoreIndexCreator(embedding=embedding_model)
 docsearch = index_creator.from_loaders([loader])
@@ -30,6 +33,7 @@ chain = RetrievalQA.from_chain_type(
     input_key="question"
 )
 
+# API Route for Frontend to call
 @app.route('/api/rag', methods=['POST'])
 def answer_generation():
     try:
@@ -43,6 +47,7 @@ def answer_generation():
         return jsonify({"answer": answer}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

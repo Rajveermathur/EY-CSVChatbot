@@ -1,12 +1,18 @@
+# Importing dependencies
 import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+# Basic information for page
 st.set_page_config(page_title="All About your CSV")
 selected_page = st.radio("Select Feature", ("Chatbot", "Data Visualizer"))
 
-
+# Radio box to select Page
 if selected_page == "Chatbot":
     st.header("Ask Your CSV")
 
@@ -41,6 +47,7 @@ if selected_page == "Chatbot":
                 "question": prompt
             }
             try:
+                # Request to Backend
                 response = requests.post("http://localhost:5000/api/rag", json=payload)
                 response.raise_for_status()
                 answer = response.json().get("answer", "No answer found.")
@@ -53,13 +60,12 @@ if selected_page == "Chatbot":
         st.session_state.messages.append({"role": "assistant", "content": answer})
     update_sidebar()
 
+# Data Visualizer Page
 else:
     @st.cache_data
     def load_data():
-        df = pd.read_csv("ai4i2020.csv")  # Replace with your CSV file path
+        df = pd.read_csv(os.environ['FILE_NAME'])  
         return df
-
-    # st.set_page_config(page_title="CSV Querying Chatbot")
 
     # Load CSV data
     df = load_data()
